@@ -1,4 +1,11 @@
 import requests
+import time
+import threading
+
+from voice import (
+    wait_for_wake_word,
+    speak
+)
 
 from actions.action_filter import (
     is_action_request
@@ -18,22 +25,44 @@ from actions.action_router import (
 from actions.tool_executor import (
     execute_action
 )
-import actions.tools
 
-print(actions.tools.__file__)
+conversation_history = []
 
-conversation_history = ""
+MAX_HISTORY = 6
 
 print("Jarvis is online.")
-print("Type 'exit' to quit.\n")
+print("Say 'Hey Jarvis' to activate.\n")
 
 while True:
 
-    user_input = input("You: ")
+    user_input = wait_for_wake_word()
 
-    if user_input.lower() == "exit":
-        print("Jarvis shutting down.")
+    if not user_input:
+        continue
+
+    if "exit" in user_input:
+
+        speak("Shutting down.")
+
         break
+
+    # -----------------------------------
+    # SMART ACKNOWLEDGEMENT SYSTEM
+    # -----------------------------------
+
+    response_ready = False
+
+    def delayed_acknowledgement():
+
+        time.sleep(2)
+
+        if not response_ready:
+            speak("One moment sir.")
+
+    threading.Thread(
+        target=delayed_acknowledgement,
+        daemon=True
+    ).start()
 
     # -----------------------------------
     # ACTION FILTER
@@ -52,14 +81,17 @@ while True:
 
         if real_actions:
 
+            response_ready = True
+
             for action_data in real_actions:
 
                 result = execute_action(action_data)
-                print(f"\nJarvis: {result}\n")
+
+                speak(result)
 
                 # Clear short-term memory if forgetting
                 if action_data["action"] == "forget_memory":
-                    conversation_history = ""
+                    conversation_history = []
 
             continue
 
@@ -82,7 +114,7 @@ Relevant memories:
 {memory_text}
 
 Conversation history:
-{conversation_history}
+{chr(10).join(conversation_history)}
 
 User: {user_input}
 
@@ -106,15 +138,24 @@ Jarvis:
 
     jarvis_response = data["response"]
 
-    print("\nJarvis:", jarvis_response)
-    print()
+    response_ready = True
+
+    speak(jarvis_response)
 
     # -----------------------------------
     # UPDATE CONVERSATION HISTORY
     # -----------------------------------
 
-    conversation_history += f"\nUser: {user_input}"
-    conversation_history += f"\nJarvis: {jarvis_response}"
+    conversation_history.append(
+        f"User: {user_input}"
+    )
+
+    conversation_history.append(
+        f"Jarvis: {jarvis_response}"
+    )
+
+    # Keep only recent exchanges
+    conversation_history = conversation_history[-MAX_HISTORY:]
 
     # -----------------------------------
     # MEMORY STORAGE

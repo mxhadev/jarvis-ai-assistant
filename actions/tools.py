@@ -23,8 +23,6 @@ def get_time():
 
     import time
 
-    print("RUNNING NEW GET_TIME FUNCTION")
-
     current_time = time.strftime("%I:%M %p")
 
     return f"The current time is {current_time}"

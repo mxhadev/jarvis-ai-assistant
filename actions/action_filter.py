@@ -6,6 +6,7 @@ def is_action_request(text):
     time_phrases = [
         "what's the time",
         "what is the time now",
+        "what is the time",
         "current time",
         "tell me the time",
         "time now"
