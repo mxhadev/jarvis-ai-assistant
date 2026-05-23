@@ -26,7 +26,6 @@ def should_store_memory(text):
     words = text_lower.split()
 
     if "?" in text or (words and words[0] in question_starters):
-        print("\n[Memory Evaluation] NO (Question Detected)\n")
         return False
 
     prompt = f"""
@@ -74,7 +73,5 @@ User message:
     )
 
     result = response.json()["response"].strip().upper()
-
-    print(f"\n[Memory Evaluation] {result}\n")
 
     return "YES" in result

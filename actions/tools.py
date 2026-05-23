@@ -2,7 +2,7 @@ import webbrowser
 import subprocess
 import urllib.parse
 import pywhatkit
-from datetime import datetime
+import time
 
 
 def open_website(url):
@@ -21,9 +21,15 @@ def open_vscode():
 
 def get_time():
 
-    current_time = datetime.now().strftime("%I:%M %p")
+    import time
+
+    print("RUNNING NEW GET_TIME FUNCTION")
+
+    current_time = time.strftime("%I:%M %p")
 
     return f"The current time is {current_time}"
+
+
 def youtube_search(query):
 
     encoded_query = urllib.parse.quote(query)
@@ -44,6 +50,8 @@ def google_search(query):
     open_website(url)
 
     return f"Searched Google for '{query}'"
+
+
 def play_youtube(query):
 
     pywhatkit.playonyt(query)

@@ -141,5 +141,4 @@ User message:
         return memories
 
     except:
-        print("[Memory Extraction Error]")
         return []

@@ -18,6 +18,9 @@ from actions.action_router import (
 from actions.tool_executor import (
     execute_action
 )
+import actions.tools
+
+print(actions.tools.__file__)
 
 conversation_history = ""
 
@@ -39,8 +42,6 @@ while True:
     if is_action_request(user_input):
 
         action_list = route_action(user_input)
-
-        print(f"\n[Action Router] {action_list}\n")
 
         # Check if any real action exists
         real_actions = [
