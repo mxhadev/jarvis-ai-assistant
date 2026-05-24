@@ -1,7 +1,8 @@
 import requests
 import time
 import threading
-
+from habit_tracker import track_action
+from web_search import search_web
 from voice import (
     wait_for_wake_word,
     speak
@@ -85,12 +86,34 @@ while True:
 
             for action_data in real_actions:
 
+                action_name = action_data["action"]
+
+                # Small delay between actions
+                time.sleep(1)
+
                 result = execute_action(action_data)
+                track_action(action_name)
+                # Stop workflow if action failed
+                if "could not" in result.lower():
+    
+                     speak(result)
+
+                     break
+
+                print(f"\nJarvis: {result}\n")
 
                 speak(result)
 
+                # Extra wait after browser/app actions
+                if action_name in [
+                    "open_website",
+                    "google_search",
+                    "youtube_search"
+                ]:
+                    time.sleep(3)
+
                 # Clear short-term memory if forgetting
-                if action_data["action"] == "forget_memory":
+                if action_name == "forget_memory":
                     conversation_history = []
 
             continue
@@ -102,7 +125,32 @@ while True:
     memories = get_memories(user_input)
 
     memory_text = "\n".join(memories)
+    # -----------------------------------
+    # WEB SEARCH DETECTION
+    # -----------------------------------
 
+    web_info = ""
+
+    web_keywords = [
+        "latest",
+        "news",
+        "today",
+        "current",
+        "weather",
+        "update",
+        "recent",
+        "who won",
+        "price",
+        "release"
+    ]
+
+    if any(
+        keyword in user_input.lower()
+        for keyword in web_keywords
+    ):
+
+        print("Jarvis is searching the web...")
+        web_info = search_web(user_input)
     # -----------------------------------
     # PROMPT BUILDING
     # -----------------------------------
@@ -112,6 +160,9 @@ You are Jarvis, a smart and personal AI assistant.
 
 Relevant memories:
 {memory_text}
+
+Live web information:
+{web_info}
 
 Conversation history:
 {chr(10).join(conversation_history)}

@@ -35,7 +35,9 @@ def is_action_request(text):
         "take",
         "read",
         "analyze",
-        "screen"
+        "screen",
+        "click",
+        "scroll"
     ]
 
     words = text.split()

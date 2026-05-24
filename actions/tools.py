@@ -6,6 +6,9 @@ import time
 import pyautogui
 import time
 from vision import analyze_screen
+from vision import click_text
+import pyautogui
+
 
 
 def open_website(url):
@@ -89,3 +92,20 @@ def analyze_screen_tool():
     result = analyze_screen()
 
     return result
+def click_text_tool(target):
+
+    result = click_text(target)
+
+    return result
+def scroll_up():
+
+    pyautogui.scroll(800)
+
+    return "Scrolled up."
+
+
+def scroll_down():
+
+    pyautogui.scroll(-800)
+
+    return "Scrolled down."

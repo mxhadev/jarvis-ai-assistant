@@ -59,10 +59,28 @@ TOOLS = [
         "description": "Take a screenshot of the screen",
         "arguments": []
     },
-    
+
     {
         "name": "analyze_screen",
         "description": "Read and analyze the current screen content",
+        "arguments": []
+    },
+
+    {
+        "name": "click_text",
+        "description": "Click text visible on the screen",
+        "arguments": ["target"]
+    },
+
+    {
+        "name": "scroll_up",
+        "description": "Scroll the screen upward",
+        "arguments": []
+    },
+
+    {
+        "name": "scroll_down",
+        "description": "Scroll the screen downward",
         "arguments": []
     }
 

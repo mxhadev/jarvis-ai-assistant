@@ -21,7 +21,8 @@ def store_memory(text, memory_id, category):
         embeddings=[embedding],
         ids=[memory_id],
         metadatas=[{
-            "category": category
+            "category": category,
+            "importance": 1
         }]
     )
 

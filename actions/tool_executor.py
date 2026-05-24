@@ -8,7 +8,10 @@ from actions.tools import (
     type_text,
     press_key,
     take_screenshot,
-    analyze_screen_tool
+    analyze_screen_tool,
+    click_text_tool,
+    scroll_up,
+    scroll_down
 )
 from memory.memory_manager import forget_memory
 def execute_action(action_data):
@@ -34,6 +37,11 @@ def execute_action(action_data):
         return google_search(
           action_data.get("query")
     )
+    elif action == "scroll_up":
+        return scroll_up()
+
+    elif action == "scroll_down":
+        return scroll_down()
     elif action == "analyze_screen":
         return analyze_screen_tool()
     elif action == "play_youtube":
@@ -52,6 +60,10 @@ def execute_action(action_data):
     elif action == "press_key":
         return press_key(
           action_data.get("key")
+    )
+    elif action == "click_text":
+        return click_text_tool(
+          action_data.get("target")
     )
 
     elif action == "take_screenshot":

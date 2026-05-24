@@ -1,8 +1,8 @@
 import uuid
-
+from profile_manager import add_profile_item
 from memory.memory_extractor import extract_memories
 from memory.query_classifier import classify_query
-
+from memory_ranker import reinforce_memory
 from memory.vector_memory import (
     store_memory,
     retrieve_memories,
@@ -37,6 +37,37 @@ def save_memory(text):
             continue
 
         category = item["category"]
+        # -----------------------------------
+        # PROFILE LEARNING
+        # -----------------------------------
+
+        if category == "preference":
+
+           add_profile_item(
+            "preferences",
+            memory_text
+        )
+
+        elif category == "goal":
+
+           add_profile_item(
+             "goals",
+             memory_text
+          )
+
+        elif category == "project":
+
+           add_profile_item(
+              "projects",
+              memory_text
+         )
+
+        elif category == "relationship":
+
+           add_profile_item(
+               "important_people",
+                memory_text
+         )
 
         memory_id = str(uuid.uuid4())
 
@@ -47,6 +78,7 @@ def save_memory(text):
                 memory_id,
                 category
             )
+            reinforce_memory(memory_text)
 
         except:
             pass

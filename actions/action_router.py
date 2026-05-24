@@ -178,6 +178,93 @@ Output:
     }}
 ]
 
+User:
+click youtube
+
+Output:
+[
+    {{
+        "action": "click_text",
+        "target": "youtube"
+    }}
+]
+
+User:
+click watch movie
+
+Output:
+[
+    {{
+        "action": "click_text",
+        "target": "watch movie"
+    }}
+]
+
+User:
+press youtube
+
+Output:
+[
+    {{
+        "action": "click_text",
+        "target": "watch movie"
+    }}
+]
+
+User:
+press watch movie
+
+Output:
+[
+    {{
+        "action": "click_text",
+        "target": "watch movie"
+    }}
+]
+
+User:
+scroll down
+
+Output:
+[
+    {{
+        "action": "scroll_down"
+    }}
+]
+
+User:
+scroll up
+
+Output:
+[
+    {{
+        "action": "scroll_up"
+    }}
+]
+
+User:
+open youtube and search phonk music
+
+Output:
+[
+    {{
+        "action": "open_website",
+        "target": "https://youtube.com"
+    }},
+    {{
+        "action": "click_text",
+        "target": "Search"
+    }},
+    {{
+        "action": "type_text",
+        "text": "phonk music"
+    }},
+    {{
+        "action": "press_key",
+        "key": "enter"
+    }}
+]
+
 If no action is needed:
 
 [
