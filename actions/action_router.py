@@ -75,6 +75,7 @@ Output:
         "query": "interstellar theme"
     }}
 ]
+
 User:
 forget my father's name
 
@@ -85,6 +86,7 @@ Output:
         "query": "father's name"
     }}
 ]
+
 User:
 open youtube and play phonk music
 
@@ -114,7 +116,70 @@ Output:
     }}
 ]
 
+User:
+type hello world
+
+Output:
+[
+    {{
+        "action": "type_text",
+        "text": "hello world"
+    }}
+]
+
+User:
+press enter
+
+Output:
+[
+    {{
+        "action": "press_key",
+        "key": "enter"
+    }}
+]
+
+User:
+take a screenshot
+
+Output:
+[
+    {{
+        "action": "take_screenshot"
+    }}
+]
+
+User:
+what's on my screen
+
+Output:
+[
+    {{
+        "action": "analyze_screen"
+    }}
+]
+
+User:
+read my screen
+
+Output:
+[
+    {{
+        "action": "analyze_screen"
+    }}
+]
+
+User:
+what is on my screen
+
+Output:
+[
+    {{
+        "action": "analyze_screen"
+    }}
+]
+
 If no action is needed:
+
 [
     {{
         "action": "none"

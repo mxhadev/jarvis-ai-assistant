@@ -61,11 +61,17 @@ def listen():
 
         print("\nListening...\n")
 
-        audio = recognizer.listen(
-            source,
-            timeout=5,
-            phrase_time_limit=8
-        )
+        try:
+
+            audio = recognizer.listen(
+                source,
+                timeout=5,
+                phrase_time_limit=8
+            )
+
+        except sr.WaitTimeoutError:
+
+            return ""
 
     try:
 
@@ -78,8 +84,6 @@ def listen():
     except:
 
         return ""
-
-
 # -----------------------------
 # WAKE WORD SYSTEM
 # -----------------------------

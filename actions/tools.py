@@ -3,6 +3,9 @@ import subprocess
 import urllib.parse
 import pywhatkit
 import time
+import pyautogui
+import time
+from vision import analyze_screen
 
 
 def open_website(url):
@@ -55,3 +58,34 @@ def play_youtube(query):
     pywhatkit.playonyt(query)
 
     return f"Playing '{query}' on YouTube"
+def type_text(text):
+
+    pyautogui.write(
+        text,
+        interval=0.05
+    )
+
+    return f"Typed: {text}"
+
+
+def press_key(key):
+
+    pyautogui.press(key)
+
+    return f"Pressed {key}"
+
+
+def take_screenshot():
+
+    filename = "screenshot.png"
+
+    screenshot = pyautogui.screenshot()
+
+    screenshot.save(filename)
+
+    return f"Screenshot saved as {filename}"
+def analyze_screen_tool():
+
+    result = analyze_screen()
+
+    return result

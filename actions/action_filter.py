@@ -29,8 +29,13 @@ def is_action_request(text):
         "show",
         "forget",
         "delete",
-        "remove"
-
+        "remove",
+        "type",
+        "press",
+        "take",
+        "read",
+        "analyze",
+        "screen"
     ]
 
     words = text.split()

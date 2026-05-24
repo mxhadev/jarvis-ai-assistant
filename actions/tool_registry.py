@@ -40,6 +40,30 @@ TOOLS = [
         "name": "forget_memory",
         "description": "ONLY use when the user explicitly asks to delete, remove, or forget a memory",
         "arguments": ["query"]
+    },
+    
+    {
+        "name": "type_text",
+        "description": "Type text using the keyboard",
+        "arguments": ["text"]
+    },
+
+    {
+        "name": "press_key",
+        "description": "Press a keyboard key",
+        "arguments": ["key"]
+    },
+
+    {
+        "name": "take_screenshot",
+        "description": "Take a screenshot of the screen",
+        "arguments": []
+    },
+    
+    {
+        "name": "analyze_screen",
+        "description": "Read and analyze the current screen content",
+        "arguments": []
     }
 
 ]
