@@ -1,8 +1,17 @@
 import requests
 import time
 import threading
+import sys
+import os
+
+from PyQt6.QtWidgets import QApplication
+
+from jarvis_hud import JarvisHUD
+
 from habit_tracker import track_action
+
 from web_search import search_web
+
 from voice import (
     wait_for_wake_word,
     speak
@@ -12,7 +21,9 @@ from actions.action_filter import (
     is_action_request
 )
 
-from memory.memory_filter import should_store_memory
+from memory.memory_filter import (
+    should_store_memory
+)
 
 from memory.memory_manager import (
     save_memory,
@@ -27,136 +38,372 @@ from actions.tool_executor import (
     execute_action
 )
 
+# -----------------------------------
+# HUD STARTUP
+# -----------------------------------
+
+app = QApplication(sys.argv)
+
+hud = JarvisHUD()
+
+hud.show()
+
+
+def update_hud():
+
+    app.processEvents()
+
+
+# -----------------------------------
+# MEMORY
+# -----------------------------------
+
 conversation_history = []
 
 MAX_HISTORY = 6
 
 print("Jarvis is online.")
+
 print("Say 'Hey Jarvis' to activate.\n")
 
-while True:
 
-    user_input = wait_for_wake_word()
+# -----------------------------------
+# ANIMATED SUBTITLE
+# -----------------------------------
 
-    if not user_input:
-        continue
+def animated_subtitle(text):
 
-    if "exit" in user_input:
+    displayed_text = ""
 
-        speak("Shutting down.")
+    words = text.split()
 
-        break
+    for word in words:
 
-    # -----------------------------------
-    # SMART ACKNOWLEDGEMENT SYSTEM
-    # -----------------------------------
+        displayed_text += word + " "
 
-    response_ready = False
+        if len(displayed_text) > 180:
 
-    def delayed_acknowledgement():
+            displayed_text = (
+                "..."
+                + displayed_text[-180:]
+            )
 
-        time.sleep(2)
+        hud.set_subtitle(
+            displayed_text
+        )
 
-        if not response_ready:
-            speak("One moment sir.")
+        update_hud()
 
-    threading.Thread(
-        target=delayed_acknowledgement,
+        time.sleep(0.03)
+
+
+# -----------------------------------
+# SAFE SPEAK THREAD
+# -----------------------------------
+
+def threaded_speak(text):
+
+    speak_thread = threading.Thread(
+        target=speak,
+        args=(text,),
         daemon=True
-    ).start()
+    )
 
-    # -----------------------------------
-    # ACTION FILTER
-    # -----------------------------------
+    speak_thread.start()
 
-    if is_action_request(user_input):
+    return speak_thread
 
-        action_list = route_action(user_input)
 
-        # Check if any real action exists
-        real_actions = [
-            action
-            for action in action_list
-            if action["action"] != "none"
-        ]
+# -----------------------------------
+# FORCE CLOSE APP
+# -----------------------------------
 
-        if real_actions:
+def force_shutdown():
 
-            response_ready = True
+    os._exit(0)
+# -----------------------------------
+# JARVIS LOOP
+# -----------------------------------
 
-            for action_data in real_actions:
+def jarvis_loop():
 
-                action_name = action_data["action"]
+    global conversation_history
 
-                # Small delay between actions
-                time.sleep(1)
+    while True:
 
-                result = execute_action(action_data)
-                track_action(action_name)
-                # Stop workflow if action failed
-                if "could not" in result.lower():
-    
-                     speak(result)
+        # -----------------------------------
+        # LISTENING
+        # -----------------------------------
 
-                     break
+        hud.set_mode("LISTENING")
 
-                print(f"\nJarvis: {result}\n")
+        hud.voice_status = "Listening"
 
-                speak(result)
+        hud.set_subtitle(
+            "Listening..."
+        )
 
-                # Extra wait after browser/app actions
-                if action_name in [
-                    "open_website",
-                    "google_search",
-                    "youtube_search"
-                ]:
-                    time.sleep(3)
+        hud.set_audio_level(15)
 
-                # Clear short-term memory if forgetting
-                if action_name == "forget_memory":
-                    conversation_history = []
+        update_hud()
 
+        user_input = wait_for_wake_word()
+
+        hud.set_audio_level(0)
+
+        update_hud()
+
+        if not user_input:
             continue
 
-    # -----------------------------------
-    # MEMORY RETRIEVAL
-    # -----------------------------------
+        hud.set_subtitle(
+            f"You: {user_input}"
+        )
 
-    memories = get_memories(user_input)
+        update_hud()
 
-    memory_text = "\n".join(memories)
-    # -----------------------------------
-    # WEB SEARCH DETECTION
-    # -----------------------------------
+        # -----------------------------------
+        # EXIT
+        # -----------------------------------
 
-    web_info = ""
+        if (
+            "exit" in user_input.lower()
+            or "shutdown" in user_input.lower()
+            or "close jarvis" in user_input.lower()
+        ):
 
-    web_keywords = [
-        "latest",
-        "news",
-        "today",
-        "current",
-        "weather",
-        "update",
-        "recent",
-        "who won",
-        "price",
-        "release"
-    ]
+            hud.set_mode("SHUTDOWN")
 
-    if any(
-        keyword in user_input.lower()
-        for keyword in web_keywords
-    ):
+            hud.voice_status = "Shutdown"
 
-        print("Jarvis is searching the web...")
-        web_info = search_web(user_input)
-    # -----------------------------------
-    # PROMPT BUILDING
-    # -----------------------------------
+            hud.set_subtitle(
+                "Shutting down..."
+            )
 
-    prompt = f"""
-You are Jarvis, a smart and personal AI assistant.
+            hud.set_audio_level(10)
+
+            update_hud()
+
+            print("Shutting down...")
+            time.sleep(0.3)
+
+            force_shutdown()
+
+            return
+
+        # -----------------------------------
+        # SMART ACKNOWLEDGEMENT
+        # -----------------------------------
+
+        response_ready = False
+
+        def delayed_acknowledgement():
+
+            time.sleep(2)
+
+            if not response_ready:
+
+                hud.set_mode("WAITING")
+
+                hud.voice_status = "Waiting"
+
+                hud.set_subtitle(
+                    "One moment sir..."
+                )
+
+                hud.set_audio_level(25)
+
+                update_hud()
+
+                threaded_speak(
+                    "One moment sir."
+                )
+
+        threading.Thread(
+            target=delayed_acknowledgement,
+            daemon=True
+        ).start()
+
+        # -----------------------------------
+        # ACTION SYSTEM
+        # -----------------------------------
+
+        if is_action_request(user_input):
+
+            action_list = route_action(user_input)
+
+            real_actions = [
+                action
+                for action in action_list
+                if action["action"] != "none"
+            ]
+
+            if real_actions:
+
+                response_ready = True
+
+                for action_data in real_actions:
+
+                    action_name = action_data["action"]
+
+                    hud.set_mode("EXECUTING")
+
+                    hud.voice_status = "Executing"
+
+                    hud.set_subtitle(
+                        f"Executing: {action_name}"
+                    )
+
+                    hud.set_audio_level(20)
+
+                    update_hud()
+
+                    time.sleep(0.5)
+
+                    result = execute_action(
+                        action_data
+                    )
+
+                    track_action(action_name)
+
+                    # FAILURE
+
+                    if "could not" in result.lower():
+
+                        hud.set_mode("ERROR")
+
+                        hud.voice_status = "Error"
+
+                        hud.set_subtitle(
+                            result
+                        )
+
+                        hud.set_audio_level(35)
+
+                        update_hud()
+
+                        threaded_speak(result)
+
+                        break
+
+                    print(f"\nJarvis: {result}\n")
+
+                    hud.set_mode("SPEAKING")
+
+                    hud.voice_status = "Speaking"
+
+                    hud.set_audio_level(35)
+
+                    animated_subtitle(
+                        f"Jarvis: {result}"
+                    )
+
+                    update_hud()
+
+                    threaded_speak(result)
+
+                    # PAGE LOAD WAIT
+
+                    if action_name in [
+                        "open_website",
+                        "google_search",
+                        "youtube_search"
+                    ]:
+
+                        hud.set_mode("LOADING")
+
+                        hud.voice_status = "Loading"
+
+                        hud.set_subtitle(
+                            "Waiting for page..."
+                        )
+
+                        update_hud()
+
+                        time.sleep(2)
+
+                    if action_name == "forget_memory":
+
+                        conversation_history = []
+
+                hud.set_audio_level(0)
+
+                update_hud()
+
+                continue
+
+        # -----------------------------------
+        # MEMORY RETRIEVAL
+        # -----------------------------------
+
+        memories = get_memories(
+            user_input
+        )
+
+        memory_text = "\n".join(memories)
+
+        # -----------------------------------
+        # WEB SEARCH
+        # -----------------------------------
+
+        web_info = ""
+
+        web_keywords = [
+            "latest",
+            "news",
+            "today",
+            "current",
+            "weather",
+            "update",
+            "recent",
+            "who won",
+            "price",
+            "release"
+        ]
+
+        if any(
+            keyword in user_input.lower()
+            for keyword in web_keywords
+        ):
+
+            hud.set_mode("WEB SEARCH")
+
+            hud.voice_status = "Searching"
+
+            hud.set_subtitle(
+                "Searching the web..."
+            )
+
+            hud.set_audio_level(20)
+
+            update_hud()
+
+            web_info = search_web(
+                user_input
+            )
+
+        # -----------------------------------
+        # THINKING
+        # -----------------------------------
+
+        hud.set_mode("THINKING")
+
+        hud.voice_status = "Thinking"
+
+        hud.set_subtitle(
+            "Thinking..."
+        )
+
+        hud.set_audio_level(30)
+
+        update_hud()
+
+        # -----------------------------------
+        # PROMPT
+        # -----------------------------------
+
+        prompt = f"""
+You are Jarvis, a smart and futuristic personal AI assistant.
 
 Relevant memories:
 {memory_text}
@@ -172,45 +419,91 @@ User: {user_input}
 Jarvis:
 """
 
-    # -----------------------------------
-    # AI RESPONSE
-    # -----------------------------------
+        # -----------------------------------
+        # AI RESPONSE
+        # -----------------------------------
 
-    response = requests.post(
-        "http://localhost:11434/api/generate",
-        json={
-            "model": "mistral",
-            "prompt": prompt,
-            "stream": False
-        }
-    )
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "mistral",
+                "prompt": prompt,
+                "stream": False
+            }
+        )
 
-    data = response.json()
+        data = response.json()
 
-    jarvis_response = data["response"]
+        jarvis_response = data["response"]
 
-    response_ready = True
+        response_ready = True
 
-    speak(jarvis_response)
+        # -----------------------------------
+        # RESPONSE DISPLAY
+        # -----------------------------------
 
-    # -----------------------------------
-    # UPDATE CONVERSATION HISTORY
-    # -----------------------------------
+        hud.set_mode("SPEAKING")
 
-    conversation_history.append(
-        f"User: {user_input}"
-    )
+        hud.voice_status = "Speaking"
 
-    conversation_history.append(
-        f"Jarvis: {jarvis_response}"
-    )
+        hud.set_audio_level(45)
 
-    # Keep only recent exchanges
-    conversation_history = conversation_history[-MAX_HISTORY:]
+        animated_subtitle(
+            f"Jarvis: {jarvis_response}"
+        )
 
-    # -----------------------------------
-    # MEMORY STORAGE
-    # -----------------------------------
+        update_hud()
 
-    if should_store_memory(user_input):
-        save_memory(user_input)
+        threaded_speak(
+            jarvis_response
+        )
+
+        hud.set_audio_level(0)
+
+        hud.set_mode("ONLINE")
+
+        hud.voice_status = "Online"
+
+        update_hud()
+
+        # -----------------------------------
+        # CONVERSATION MEMORY
+        # -----------------------------------
+
+        conversation_history.append(
+            f"User: {user_input}"
+        )
+
+        conversation_history.append(
+            f"Jarvis: {jarvis_response}"
+        )
+
+        conversation_history = (
+            conversation_history[-MAX_HISTORY:]
+        )
+
+        # -----------------------------------
+        # MEMORY STORAGE
+        # -----------------------------------
+
+        if should_store_memory(user_input):
+
+            save_memory(user_input)
+
+
+# -----------------------------------
+# START BACKEND THREAD
+# -----------------------------------
+
+jarvis_thread = threading.Thread(
+    target=jarvis_loop,
+    daemon=True
+)
+
+jarvis_thread.start()
+
+# -----------------------------------
+# QT EVENT LOOP
+# -----------------------------------
+
+sys.exit(app.exec())
