@@ -4,6 +4,15 @@ import asyncio
 import pygame
 import uuid
 import time
+import random
+ACKNOWLEDGEMENTS = [
+    "Yes sir?",
+    "I'm listening sir.",
+    "Go ahead sir.",
+    "Ready when you are sir.",
+    "At your service sir.",
+    "What can I do for you sir?"
+]
 # -----------------------------------
 # SPEECH RECOGNIZER
 # -----------------------------------
@@ -75,9 +84,13 @@ def wait_for_wake_word():
             or "jarvis" in text
         ):
 
-            print("Jarvis: Yes sir?")
+            response = random.choice(
+                 ACKNOWLEDGEMENTS
+            )
 
-            speak("Yes sir")
+            print(f"Jarvis: {response}")
+
+            speak(response)
 
             command = listen()
 

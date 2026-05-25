@@ -3,7 +3,7 @@ import time
 import threading
 import sys
 import os
-
+import random
 from PyQt6.QtWidgets import QApplication
 
 from jarvis_hud import JarvisHUD
@@ -37,6 +37,37 @@ from actions.action_router import (
 from actions.tool_executor import (
     execute_action
 )
+ACKNOWLEDGEMENTS = [
+    "Yes sir?",
+    "I'm listening sir.",
+    "Go ahead sir.",
+    "Ready when you are sir.",
+    "At your service sir.",
+    "What can I do for you sir?"
+]
+
+THANK_RESPONSES = [
+    "Always sir.",
+    "Happy to help.",
+    "Anytime sir.",
+    "That's what I'm here for.",
+    "Glad to assist."
+]
+
+HOW_ARE_YOU_RESPONSES = [
+    "Running smoothly sir.",
+    "All systems operational.",
+    "Doing great sir.",
+    "Better now that you're here.",
+    "Functioning at peak efficiency."
+]
+
+FUNNY_RESPONSES = [
+    "I would smile if I had a face.",
+    "Still less buggy than most apps.",
+    "I try my best sir.",
+    "Surviving another day in Python."
+]
 
 # -----------------------------------
 # HUD STARTUP
