@@ -37,6 +37,10 @@ A locally running AI assistant with:
 - Mistral AI
 - ChromaDB
 - Sentence Transformers
+- PyQt6
+- Edge-TTS
+- PyInstaller
+- Inno Setup
 
 ## Example Commands
 
